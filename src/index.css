@@ -315,3 +315,16 @@ h2, .h2 {
 main {
   flex: 1;
 }
+
+.catalog-item-card .card-text:first-child,
+.top-sales .card-text:first-child {
+  min-height: 3em;
+  margin-bottom: 0.5em;
+}
+
+.catalog-item-card .card-img-top,
+.top-sales .card-img-top {
+  height: 500px;
+  object-fit: contain;
+  padding: 10px;
+}

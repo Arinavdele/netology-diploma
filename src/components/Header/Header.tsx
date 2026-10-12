@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useState } from "react";
+import { NavLink } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const [searchVisible, setSearchVisible] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
+  const navigate = useNavigate();
 
   const toggleSearch = () => setSearchVisible((v) => !v);
 
@@ -23,7 +25,7 @@ export default function Header() {
                     to="/"
                     end
                     className={({ isActive }) =>
-                      'nav-link' + (isActive ? ' active' : '')
+                      "nav-link" + (isActive ? " active" : "")
                     }
                   >
                     Главная
@@ -33,7 +35,7 @@ export default function Header() {
                   <NavLink
                     to="/catalog"
                     className={({ isActive }) =>
-                      'nav-link' + (isActive ? ' active' : '')
+                      "nav-link" + (isActive ? " active" : "")
                     }
                   >
                     Каталог
@@ -43,7 +45,7 @@ export default function Header() {
                   <NavLink
                     to="/about"
                     className={({ isActive }) =>
-                      'nav-link' + (isActive ? ' active' : '')
+                      "nav-link" + (isActive ? " active" : "")
                     }
                   >
                     О магазине
@@ -53,7 +55,7 @@ export default function Header() {
                   <NavLink
                     to="/contacts"
                     className={({ isActive }) =>
-                      'nav-link' + (isActive ? ' active' : '')
+                      "nav-link" + (isActive ? " active" : "")
                     }
                   >
                     Контакты
@@ -77,12 +79,19 @@ export default function Header() {
 
                 <form
                   className={
-                    'header-controls-search-form form-inline ' +
-                    (searchVisible ? '' : 'invisible')
+                    "header-controls-search-form form-inline " +
+                    (searchVisible ? "" : "invisible")
                   }
                   onSubmit={(e) => {
                     e.preventDefault();
-                    // TODO: поиск
+
+                    if (searchValue.trim()) {
+                      navigate(
+                        `/catalog?q=${encodeURIComponent(searchValue.trim())}`,
+                      );
+                    }
+                    setSearchVisible(false);
+                    setSearchValue("");
                   }}
                 >
                   <input
