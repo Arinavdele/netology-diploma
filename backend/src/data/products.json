@@ -1255,7 +1255,7 @@
     "reason": "Прогулка",
     "season": "Лето",
     "heelSize": "4 см.",
-    "price": 34000,
+    "price": 35000,
     "sizes": [
       {
         "size": "18 US",
@@ -1263,7 +1263,7 @@
       },
       {
         "size": "20 US",
-        "available": false
+        "available": true
       }
     ]
   },

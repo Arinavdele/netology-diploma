@@ -103,12 +103,29 @@ export default function Catalog({ showSearch = false }: CatalogProps) {
 
       {loading && items.length === 0 && <Loader />}
 
-      {!error && (
-        <div className="row">
-          {items.map((item) => (
-            <ProductCard key={item.id} product={item} />
-          ))}
-        </div>
+       {!error && (
+        <>
+          {items.length === 0 && !loading ? (
+            <div className="text-center my-5">
+              <h4>По вашему запросу ничего не найдено</h4>
+              <p className="text-muted">Попробуйте изменить запрос или сбросить фильтры.</p>
+              {searchQuery && (
+                <button
+                  className="btn btn-outline-primary mt-3"
+                  onClick={() => navigate('/catalog')}
+                >
+                  Сбросить поиск
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="row">
+              {items.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {!error && hasMore && items.length > 0 && (

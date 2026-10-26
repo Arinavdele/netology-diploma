@@ -1,27 +1,38 @@
-// src/pages/CartPage.tsx
-
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { removeFromCart, clearCart } from '../store/slices/cartSlice';
-import { api } from '../api/api';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { removeFromCart, clearCart } from "../store/slices/cartSlice";
+import { api } from "../api/api";
+import { useEffect } from "react";
+import { encodeData, decodeData } from "../utils/storage";
 
 export default function CartPage() {
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector((state) => state.cart.items);
 
   // Состояния формы
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState(() => {
+    const saved = localStorage.getItem("order_phone");
+    return saved ? decodeData(saved) : "";
+  });
+  const [address, setAddress] = useState(() => {
+    const saved = localStorage.getItem("order_address");
+    return saved ? decodeData(saved) : "";
+  });
   const [agreement, setAgreement] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (phone) localStorage.setItem("order_phone", encodeData(phone));
+    if (address) localStorage.setItem("order_address", encodeData(address));
+  }, [phone, address]);
+
   // Общ сумма
   const totalSum = cartItems.reduce(
     (sum, item) => sum + item.price * item.count,
-    0
+    0,
   );
 
   // Удаление товара
@@ -54,10 +65,20 @@ export default function CartPage() {
       .postOrder(orderData)
       .then(() => {
         dispatch(clearCart());
+        
+        localStorage.removeItem('order_phone');
+        localStorage.removeItem('order_address');
+        
+        setPhone('');
+        setAddress('');
+        setAgreement(false);
+        
         setSuccess(true);
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Ошибка при оформлении заказа');
+        setError(
+          err instanceof Error ? err.message : 'Ошибка при оформлении заказа'
+        );
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -119,8 +140,10 @@ export default function CartPage() {
                 </td>
                 <td>{item.size}</td>
                 <td>{item.count}</td>
-                <td>{item.price.toLocaleString('ru-RU')} руб.</td>
-                <td>{(item.price * item.count).toLocaleString('ru-RU')} руб.</td>
+                <td>{item.price.toLocaleString("ru-RU")} руб.</td>
+                <td>
+                  {(item.price * item.count).toLocaleString("ru-RU")} руб.
+                </td>
                 <td>
                   <button
                     className="btn btn-outline-danger btn-sm"
@@ -136,7 +159,7 @@ export default function CartPage() {
                 Общая стоимость
               </td>
               <td colSpan={2} className="font-weight-bold">
-                {totalSum.toLocaleString('ru-RU')} руб.
+                {totalSum.toLocaleString("ru-RU")} руб.
               </td>
             </tr>
           </tbody>
@@ -145,7 +168,7 @@ export default function CartPage() {
 
       <section className="order">
         <h2 className="text-center">Оформить заказ</h2>
-        <div className="card" style={{ maxWidth: '30rem', margin: '0 auto' }}>
+        <div className="card" style={{ maxWidth: "30rem", margin: "0 auto" }}>
           <form className="card-body" onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="phone">Телефон</label>
@@ -182,15 +205,15 @@ export default function CartPage() {
                 Согласен с правилами доставки
               </label>
             </div>
-            
+
             {error && <div className="alert alert-danger">{error}</div>}
 
-            <button 
-              type="submit" 
-              className="btn btn-outline-secondary" 
+            <button
+              type="submit"
+              className="btn btn-outline-secondary"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Отправка...' : 'Оформить'}
+              {isSubmitting ? "Отправка..." : "Оформить"}
             </button>
           </form>
         </div>
