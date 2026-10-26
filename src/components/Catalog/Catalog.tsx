@@ -1,7 +1,11 @@
+// src/components/Catalog/Catalog.tsx
+
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Categories from '../Categories/Categories';
 import ProductCard from '../ProductCard/ProductCard';
+import Loader from '../Loader/Loader';          
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   fetchItemsRequest,
@@ -17,10 +21,9 @@ export default function Catalog({ showSearch = false }: CatalogProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Берём q из URL
   const searchQuery = searchParams.get('q') || '';
 
-  const { items, categoryId, offset, hasMore } = useAppSelector(
+  const { items, categoryId, offset, hasMore, loading, error } = useAppSelector(
     (state) => state.catalog
   );
 
@@ -30,7 +33,7 @@ export default function Catalog({ showSearch = false }: CatalogProps) {
     setLocalSearch(searchQuery);
   }, [searchQuery]);
 
-  useEffect(() => {
+  const loadItems = () => {
     dispatch(resetCatalog());
     dispatch(
       fetchItemsRequest({
@@ -40,6 +43,10 @@ export default function Catalog({ showSearch = false }: CatalogProps) {
         reset: true,
       })
     );
+  };
+
+  useEffect(() => {
+    loadItems();
   }, [dispatch, searchQuery]);
 
   const handleSelectCategory = (id: number) => {
@@ -65,10 +72,9 @@ export default function Catalog({ showSearch = false }: CatalogProps) {
     );
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmed = localSearch.trim();
-
     if (trimmed) {
       navigate(`/catalog?q=${encodeURIComponent(trimmed)}`);
     } else {
@@ -81,10 +87,7 @@ export default function Catalog({ showSearch = false }: CatalogProps) {
       <h2 className="text-center">Каталог</h2>
 
       {showSearch && (
-        <form
-          className="catalog-search-form form-inline"
-          onSubmit={handleSearchSubmit}
-        >
+        <form className="catalog-search-form form-inline" onSubmit={handleSearchSubmit}>
           <input
             className="form-control"
             placeholder="Поиск"
@@ -96,17 +99,27 @@ export default function Catalog({ showSearch = false }: CatalogProps) {
 
       <Categories activeId={categoryId} onSelect={handleSelectCategory} />
 
-      <div className="row">
-        {items.map((item) => (
-          <ProductCard key={item.id} product={item} />
-        ))}
-      </div>
+      {error && <ErrorMessage onRetry={loadItems} />}
 
-      {hasMore && items.length > 0 && (
-        <div className="text-center">
-          <button className="btn btn-outline-primary" onClick={handleLoadMore}>
-            Загрузить ещё
-          </button>
+      {loading && items.length === 0 && <Loader />}
+
+      {!error && (
+        <div className="row">
+          {items.map((item) => (
+            <ProductCard key={item.id} product={item} />
+          ))}
+        </div>
+      )}
+
+      {!error && hasMore && items.length > 0 && (
+        <div className="text-center mt-4">
+          {loading ? (
+            <Loader />
+          ) : (
+            <button className="btn btn-outline-primary" onClick={handleLoadMore}>
+              Загрузить ещё
+            </button>
+          )}
         </div>
       )}
     </section>

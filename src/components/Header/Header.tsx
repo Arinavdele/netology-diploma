@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../store/hooks";
 
 export default function Header() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const navigate = useNavigate();
+  const cartItems = useAppSelector((state) => state.cart.items);
+  const totalCount = cartItems.reduce((sum, item) => sum + item.count, 0);
 
   const toggleSearch = () => setSearchVisible((v) => !v);
 
@@ -73,7 +76,11 @@ export default function Header() {
                     to="/cart"
                     className="header-controls-pic header-controls-cart"
                   >
-                    <div className="header-controls-cart-full">0</div>
+                    {totalCount > 0 && (
+                      <div className="header-controls-cart-full">
+                        {totalCount}
+                      </div>
+                    )}
                   </NavLink>
                 </div>
 
